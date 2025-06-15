@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>小万团队地址查询系统</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    input { padding: 10px; width: 100%; font-size: 16px; box-sizing: border-box; }
+    button { padding: 10px 16px; margin-top: 10px; font-size: 16px; }
+    ul { list-style: none; padding: 0; }
+    li { margin-top: 10px; border-bottom: 1px solid #ccc; padding: 6px 0; }
+    #count { margin-top: 12px; font-weight: bold; color: #333; }
+  </style>
+</head>
+<body>
+  <h2>小万团队地址查询系统</h2>
+  <input type="text" id="searchInput" placeholder="请输入关键字（城市/日期）" inputmode="search">
+  <button onclick="search()">搜索</button>
+  
+  <div id="count"></div>
+  <ul id="results"></ul>
+
+  <script>
+    let data = [];
+
+    fetch('data.json')
+      .then(res => res.json())
+      .then(json => data = json)
+      .catch(err => alert("加载数据失败：" + err));
+
+    function search() {
+      const keyword = document.getElementById('searchInput').value.trim();
+      const results = document.getElementById('results');
+      const countDiv = document.getElementById('count');
+      results.innerHTML = '';
+      countDiv.textContent = '';
+
+      if (!keyword) {
+        countDiv.textContent = '请输入关键词进行搜索';
+        return;
+      }
+
+      const filtered = data.filter(item =>
+        item.地区.includes(keyword) || item.日期.includes(keyword)
+      );
+
+      if (filtered.length === 0) {
+        results.innerHTML = '<li>未找到匹配结果</li>';
+      } else {
+        filtered.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = `${item.地区}（日期：${item.日期}）`;
+          results.appendChild(li);
+        });
+      }
+
+      countDiv.textContent = `共找到 ${filtered.length} 条结果`;
+    }
+
+    // ✅ 支持回车键/手机“搜索”键触发搜索
+    document.getElementById('searchInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        search();
+        e.preventDefault(); // 防止回车刷新
+      }
+    });
+  </script>
+</body>
+</html>
